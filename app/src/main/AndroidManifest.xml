@@ -26,6 +26,10 @@
             android:name=".AuthActivity"
             android:exported="false"
             android:theme="@style/Theme.LinkShareCompose" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LinkShareCompose" />
     </application>
 
 </manifest>

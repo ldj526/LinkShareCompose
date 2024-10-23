@@ -1,5 +1,6 @@
 package com.example.linksharecompose
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,25 +41,18 @@ class AuthActivity : ComponentActivity() {
 fun NavigationComponent(navController: NavHostController, paddingValues: PaddingValues) {
     NavHost(
         navController = navController,
-        startDestination = "signupScreen",
+        startDestination = "loginScreen",
         modifier = Modifier.padding(paddingValues = paddingValues)
     ) {
         composable("signupScreen") { SignupScreen(navController) }
-    }
-}
-
-@Composable
-fun Greeting2(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview2() {
-    LinkShareComposeTheme {
-        Greeting2("Android")
+        composable("loginScreen") {
+            LoginScreen(
+                navController,
+                onLoginSuccess = {
+                    val context = navController.context
+                    context.startActivity(Intent(context, MainActivity::class.java))
+                    (context as ComponentActivity).finish()
+                })
+        }
     }
 }
