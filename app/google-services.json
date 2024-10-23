@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "896988320597",
+    "project_id": "linksharecompose-5eb52",
+    "storage_bucket": "linksharecompose-5eb52.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896988320597:android:b81ad276b455b79ce455dc",
+        "android_client_info": {
+          "package_name": "com.example.linksharecompose"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCStWm_3d0BC3WZByM98_ennsvacStU5YU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
