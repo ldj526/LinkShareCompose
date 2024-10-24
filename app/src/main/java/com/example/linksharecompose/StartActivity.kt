@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
+import com.example.linksharecompose.auth.AuthActivity
 import com.google.firebase.auth.FirebaseAuth
 
 class StartActivity : ComponentActivity() {
