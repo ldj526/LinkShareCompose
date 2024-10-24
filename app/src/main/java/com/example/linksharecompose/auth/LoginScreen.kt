@@ -1,4 +1,4 @@
-package com.example.linksharecompose
+package com.example.linksharecompose.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

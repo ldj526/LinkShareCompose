@@ -1,11 +1,14 @@
-package com.example.linksharecompose
+package com.example.linksharecompose.auth
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,19 +21,23 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -42,27 +49,33 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun SignupScreen(navController: NavController) {
+fun SignupScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel
+) {
+    var nickname by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    val signUpResult by authViewModel.signupResult.observeAsState()
+    val isSignupLoading by authViewModel.isSignupLoading.observeAsState(initial = false)
+    val isNicknameCheckLoading by authViewModel.isNicknameCheckLoading.observeAsState(initial = false)
+
+    val emailStatus by authViewModel.emailStatus.observeAsState()
+    val isEmailAvailable by authViewModel.isEmailAvailable.observeAsState()
+    val nicknameStatus by authViewModel.nicknameStatus.observeAsState()
+    val isNicknameAvailable by authViewModel.isNicknameAvailable.observeAsState()
+    val passwordStatus by authViewModel.passwordStatus.observeAsState()
+    val confirmPasswordStatus by authViewModel.confirmPasswordStatus.observeAsState()
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var nickname by remember { mutableStateOf("") }
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var confirmPassword by remember { mutableStateOf("") }
-        var passwordVisible by remember { mutableStateOf(false) }
-        var confirmPasswordVisible by remember { mutableStateOf(false) }
-        var emailErrorMsg by remember { mutableStateOf<String?>(null) }
-        var emailSuccessMsg by remember { mutableStateOf<String?>(null) }
-        var nicknameErrorMsg by remember { mutableStateOf<String?>(null) }
-        var nicknameSuccessMsg by remember { mutableStateOf<String?>(null) }
-        var passwordErrorMsg by remember { mutableStateOf<String?>(null) }
-        var confirmPasswordErrorMsg by remember { mutableStateOf<String?>(null) }
-        var isNicknameAvailable by remember { mutableStateOf<Boolean?>(null) }
-        var isEmailAvailable by remember { mutableStateOf<Boolean?>(null) }
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -114,13 +127,13 @@ fun SignupScreen(navController: NavController) {
             OutlinedTextField(
                 value = nickname,
                 onValueChange = {
-                    nickname = it
-                    nicknameErrorMsg = null
-                    nicknameSuccessMsg = null
-                    isNicknameAvailable = null
+                    if (it.length <= 10) {
+                        nickname = it
+                        authViewModel.onNicknameChanged(it)
+                    }
                 },
                 label = { Text("닉네임") },
-                isError = nicknameErrorMsg != null,
+                isError = nicknameStatus != null && nicknameStatus != "사용 가능한 닉네임입니다.",
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
@@ -130,33 +143,36 @@ fun SignupScreen(navController: NavController) {
 
             Button(
                 onClick = {
-
+                    authViewModel.checkNicknameDuplication(nickname)
                 },
-                enabled = nickname.isNotEmpty(),
+                enabled = nickname.isNotEmpty() && !isNicknameCheckLoading &&
+                        nicknameStatus != "닉네임은 한글, 영어, 숫자만 가능합니다.\n2자 이상 10자 이하로 입력해주세요.",
                 modifier = Modifier
                     .wrapContentWidth()
             ) {
-                Text(text = "중복체크")
+                Box(contentAlignment = Alignment.Center) {
+                    Text(text = "중복체크")
+                    if (isNicknameCheckLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+                }
             }
         }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(20.dp)
+                .height(40.dp)
         ) {
-            this@Column.AnimatedVisibility(visible = nicknameErrorMsg != null || nicknameSuccessMsg != null) {
-                nicknameErrorMsg?.let {
+            this@Column.AnimatedVisibility(visible = nicknameStatus != null) {
+                nicknameStatus?.let {
                     Text(
                         text = it,
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                } ?: nicknameSuccessMsg?.let {
-                    Text(
-                        text = it,
-                        color = Color.Green,
+                        color = if (it == "사용 가능한 닉네임입니다.") Color.Green else Color.Red,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(start = 16.dp)
                     )
@@ -173,25 +189,11 @@ fun SignupScreen(navController: NavController) {
                 value = email,
                 onValueChange = {
                     email = it
-                    emailErrorMsg = null
-                    emailSuccessMsg = null
-                    isEmailAvailable = null
-
-                    if (it.isNotBlank()) {
-                        emailErrorMsg =
-                            if (android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()) {
-                                null
-                            } else {
-                                "이메일 형식이 잘못됐습니다."
-                            }
-                        if (emailErrorMsg == null) {
-                            /* 닉네임 중복 확인 로직 */
-                        }
-                    }
+                    authViewModel.onEmailChanged(it)
                 },
                 label = { Text("이메일") },
                 singleLine = true,
-                isError = emailErrorMsg != null,
+                isError = emailStatus != null && emailStatus != "사용 가능한 이메일입니다.",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp)
@@ -202,18 +204,19 @@ fun SignupScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(20.dp)
             ) {
-                this@Column.AnimatedVisibility(visible = emailErrorMsg != null || emailSuccessMsg != null) {
-                    emailErrorMsg?.let {
+                this@Column.AnimatedVisibility(visible = emailStatus != null) {
+                    emailStatus?.let {
+                        val textColor = when (it) {
+                            "사용 가능한 이메일입니다." -> Color.Green
+                            "이미 사용 중인 이메일입니다." -> Color.Red
+                            "이메일 형식이 잘못됐습니다." -> Color.Red
+                            "이메일 중복 확인에 실패했습니다." -> Color.Red
+                            else -> Color.Black
+                        }
+
                         Text(
                             text = it,
-                            color = Color.Red,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 16.dp)
-                        )
-                    } ?: emailSuccessMsg?.let {
-                        Text(
-                            text = it,
-                            color = Color.Green,
+                            color = textColor,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = 16.dp)
                         )
@@ -225,15 +228,7 @@ fun SignupScreen(navController: NavController) {
                 value = password,
                 onValueChange = {
                     password = it
-                    val pwdPattern =
-                        "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$!%*#?&.])[A-Za-z[0-9]$@$!%*#?&.]+$"
-                    passwordErrorMsg = when {
-                        it.isBlank() -> "비밀번호를 입력해주세요."
-                        (it.length < 8 || it.length > 20) && it.matches(pwdPattern.toRegex()) -> "8자리 이상 20자리 이하로 입력해주세요"
-                        (it.length < 8 || it.length > 20) && !it.matches(pwdPattern.toRegex()) -> "8자리 이상 20자리 이하로 입력해주세요\n영문, 숫자, 특수문자를 1개 이상 입력해주세요."
-                        (it.length in 8..20) && !it.matches(pwdPattern.toRegex()) -> "영문, 숫자, 특수문자를 1개 이상 입력해주세요."
-                        else -> null
-                    }
+                    authViewModel.onPasswordChanged(password, confirmPassword)
                 },
                 label = { Text("패스워드") },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -246,7 +241,7 @@ fun SignupScreen(navController: NavController) {
                     }
                 },
                 singleLine = true,
-                isError = passwordErrorMsg != null,
+                isError = passwordStatus != null && passwordStatus != "사용 가능한 비밀번호입니다.",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp)
@@ -257,11 +252,11 @@ fun SignupScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(20.dp)
             ) {
-                this@Column.AnimatedVisibility(visible = passwordErrorMsg != null) {
-                    passwordErrorMsg?.let {
+                this@Column.AnimatedVisibility(visible = passwordStatus != null) {
+                    passwordStatus?.let {
                         Text(
                             text = it,
-                            color = Color.Red,
+                            color = if (it == "사용 가능한 비밀번호입니다.") Color.Green else Color.Red,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = 16.dp)
                         )
@@ -273,11 +268,7 @@ fun SignupScreen(navController: NavController) {
                 value = confirmPassword,
                 onValueChange = {
                     confirmPassword = it
-                    confirmPasswordErrorMsg = when {
-                        it.isBlank() -> "비밀번호를 입력해주세요."
-                        it != password -> "비밀번호가 일치하지 않습니다."
-                        else -> null
-                    }
+                    authViewModel.onPasswordChanged(password, confirmPassword)
                 },
                 label = { Text("패스워드 확인") },
                 visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -290,7 +281,7 @@ fun SignupScreen(navController: NavController) {
                     }
                 },
                 singleLine = true,
-                isError = confirmPasswordErrorMsg != null,
+                isError = confirmPasswordStatus != null && confirmPasswordStatus != "비밀번호가 일치합니다.",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp)
@@ -301,11 +292,11 @@ fun SignupScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(20.dp)
             ) {
-                this@Column.AnimatedVisibility(visible = confirmPasswordErrorMsg != null) {
-                    confirmPasswordErrorMsg?.let {
+                this@Column.AnimatedVisibility(visible = confirmPasswordStatus != null) {
+                    confirmPasswordStatus?.let {
                         Text(
                             text = it,
-                            color = Color.Red,
+                            color = if (it == "비밀번호가 일치합니다.") Color.Green else Color.Red,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = 16.dp)
                         )
@@ -315,29 +306,41 @@ fun SignupScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    if (emailErrorMsg == null && nicknameErrorMsg == null && passwordErrorMsg == null &&
-                        isEmailAvailable == true && isNicknameAvailable == true
-                    ) {
-                        /* 회원가입 로직 */
-                    }
+                        authViewModel.signupUserWithEmail(email, password, nickname)
                 },
-                enabled = email.isNotEmpty() && nickname.isNotEmpty() && password.isNotEmpty() &&
-                        emailErrorMsg == null && nicknameErrorMsg == null && passwordErrorMsg == null &&
-                        isEmailAvailable == true && isNicknameAvailable == true,
+                enabled = email.isNotEmpty() && nickname.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() &&
+                        isEmailAvailable == true && isNicknameAvailable == true && !isSignupLoading &&
+                        passwordStatus == "사용 가능한 비밀번호입니다." && confirmPasswordStatus == "비밀번호가 일치합니다.",
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
                     .padding(16.dp)
             ) {
-                Text(text = "회원가입")
+                Box(contentAlignment = Alignment.Center) {
+                    Text(text = "회원가입")
+                    if (isSignupLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+                }
+            }
+        }
+
+        signUpResult?.let { result ->
+            if (result.isSuccess) {
+                LaunchedEffect(Unit) {
+                    navController.navigate("loginScreen") {
+                        popUpTo("loginScreen") { inclusive = true }
+                    }
+                }
+            } else if (result.isFailure) {
+                val error = result.exceptionOrNull()?.message
+                Toast.makeText(LocalContext.current, "회원가입 실패: $error", Toast.LENGTH_LONG)
+                    .show()
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun SignUpScreenPreview() {
-    val navController = rememberNavController()
-    SignupScreen(navController = navController)
 }

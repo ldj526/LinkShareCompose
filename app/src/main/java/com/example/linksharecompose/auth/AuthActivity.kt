@@ -1,4 +1,4 @@
-package com.example.linksharecompose
+package com.example.linksharecompose.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,16 +9,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.linksharecompose.MainActivity
 import com.example.linksharecompose.ui.theme.LinkShareComposeTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,11 +26,18 @@ class AuthActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LinkShareComposeTheme {
+                val authViewModel: AuthViewModel = viewModel(
+                    factory = AuthViewModelFactory(
+                        AuthRepository(
+                            FirebaseAuth.getInstance()
+                        )
+                    )
+                )
                 val navController = rememberNavController()
 
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     content = { paddingValues ->
-                        NavigationComponent(navController, paddingValues)
+                        NavigationComponent(navController, paddingValues, authViewModel)
                     })
             }
         }
@@ -38,13 +45,17 @@ class AuthActivity : ComponentActivity() {
 }
 
 @Composable
-fun NavigationComponent(navController: NavHostController, paddingValues: PaddingValues) {
+fun NavigationComponent(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+    authViewModel: AuthViewModel
+) {
     NavHost(
         navController = navController,
         startDestination = "loginScreen",
         modifier = Modifier.padding(paddingValues = paddingValues)
     ) {
-        composable("signupScreen") { SignupScreen(navController) }
+        composable("signupScreen") { SignupScreen(navController, authViewModel) }
         composable("loginScreen") {
             LoginScreen(
                 navController,
