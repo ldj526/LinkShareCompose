@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
@@ -34,6 +35,25 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private val _isNicknameCheckLoading = MutableLiveData<Boolean>(false)
     val isNicknameCheckLoading: LiveData<Boolean> = _isNicknameCheckLoading
+
+    private val _isLoginLoading = MutableLiveData<Boolean>(false)
+    val isLoginLoading: LiveData<Boolean> = _isLoginLoading
+
+    private val _loginResult = MutableLiveData<Result<FirebaseUser?>>()
+    val loginResult: LiveData<Result<FirebaseUser?>> get() = _loginResult
+
+    // 로그인
+    fun signInWithEmailAndPassword(email: String, password: String) {
+        _isLoginLoading.value = true
+        viewModelScope.launch {
+            try {
+                val result = repository.signInWithEmailAndPassword(email, password)
+                _loginResult.postValue(result)
+            } finally {
+                _isLoginLoading.value = false
+            }
+        }
+    }
 
     // 이메일 중복 확인
     private fun checkEmailDuplication(email: String) {

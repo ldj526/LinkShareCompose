@@ -59,6 +59,7 @@ fun NavigationComponent(
         composable("loginScreen") {
             LoginScreen(
                 navController,
+                authViewModel,
                 onLoginSuccess = {
                     val context = navController.context
                     context.startActivity(Intent(context, MainActivity::class.java))

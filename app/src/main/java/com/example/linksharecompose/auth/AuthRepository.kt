@@ -1,9 +1,20 @@
 package com.example.linksharecompose.auth
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
 
 class AuthRepository(private val auth: FirebaseAuth) {
+
+    // Email/Password 로그인
+    suspend fun signInWithEmailAndPassword(email: String, password: String): Result<FirebaseUser?> {
+        return try {
+            val authResult = auth.signInWithEmailAndPassword(email, password).await()
+            Result.success(authResult.user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     // 닉네임 중복 확인
     suspend fun checkNicknameDuplication(nickname: String): Result<Boolean> {
