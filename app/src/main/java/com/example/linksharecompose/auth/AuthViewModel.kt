@@ -39,8 +39,24 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _isLoginLoading = MutableLiveData<Boolean>(false)
     val isLoginLoading: LiveData<Boolean> = _isLoginLoading
 
-    private val _loginResult = MutableLiveData<Result<FirebaseUser?>>()
-    val loginResult: LiveData<Result<FirebaseUser?>> get() = _loginResult
+    private val _emailLoginResult = MutableLiveData<Result<FirebaseUser?>>()
+    val emailLoginResult: LiveData<Result<FirebaseUser?>> get() = _emailLoginResult
+
+    private val _googleLoginResult = MutableLiveData<Result<FirebaseUser?>>()
+    val googleLoginResult: LiveData<Result<FirebaseUser?>> get() = _googleLoginResult
+
+    // Google로 로그인
+    fun signInWithGoogle(idToken: String) {
+        _isLoginLoading.value = true
+        viewModelScope.launch {
+            try {
+                val result = repository.signInWithGoogle(idToken)
+                _googleLoginResult.postValue(result)
+            } finally {
+                _isLoginLoading.value = false
+            }
+        }
+    }
 
     // 로그인
     fun signInWithEmailAndPassword(email: String, password: String) {
@@ -48,7 +64,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 val result = repository.signInWithEmailAndPassword(email, password)
-                _loginResult.postValue(result)
+                _emailLoginResult.postValue(result)
             } finally {
                 _isLoginLoading.value = false
             }
