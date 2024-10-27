@@ -64,7 +64,18 @@ fun NavigationComponent(
                     val context = navController.context
                     context.startActivity(Intent(context, MainActivity::class.java))
                     (context as ComponentActivity).finish()
+                },
+                onNavigateToNicknameSet = { userId ->
+                    navController.navigate("nicknameSetScreen/$userId")
                 })
+        }
+        composable("nicknameSetScreen/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            NicknameSetScreen(navController, authViewModel, userId, onNicknameSetSuccess = {
+                val context = navController.context
+                context.startActivity(Intent(context, MainActivity::class.java))
+                (context as ComponentActivity).finish()
+            })
         }
     }
 }

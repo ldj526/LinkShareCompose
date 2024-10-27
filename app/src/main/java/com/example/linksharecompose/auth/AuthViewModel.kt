@@ -21,6 +21,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _nicknameStatus = MutableLiveData<String?>(null)
     val nicknameStatus: LiveData<String?> = _nicknameStatus
 
+    private val _nicknameAddStatus = MutableLiveData<Result<Unit>>()
+    val nicknameAddStatus: LiveData<Result<Unit>> get() = _nicknameAddStatus
+
     private val _isNicknameAvailable = MutableLiveData<Boolean?>(null)
     val isNicknameAvailable: LiveData<Boolean?> = _isNicknameAvailable
 
@@ -44,6 +47,35 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private val _googleLoginResult = MutableLiveData<Result<FirebaseUser?>>()
     val googleLoginResult: LiveData<Result<FirebaseUser?>> get() = _googleLoginResult
+
+    // 닉네임을 Firestore에 추가
+    fun addNickname(userId: String, nickname: String) {
+        _isSignupLoading.value = true
+        viewModelScope.launch {
+            try {
+                val result = repository.addNicknameToUser(userId, nickname)
+                _nicknameAddStatus.postValue(result)
+            } finally {
+                _isSignupLoading.value = false
+            }
+        }
+    }
+
+    // Nickname의 존재 여부 확인 후 view 이동
+    fun checkAndNavigateToNicknameScreen(
+        user: FirebaseUser,
+        onNavigateToNicknameSet: (String) -> Unit,
+        onLoginSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            val hasNickname = repository.userHasNickname(user)
+            if (!hasNickname) {
+                onNavigateToNicknameSet(user.uid)
+            } else {
+                onLoginSuccess()
+            }
+        }
+    }
 
     // Google로 로그인
     fun signInWithGoogle(idToken: String) {
@@ -80,7 +112,8 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                     onSuccess = { isDuplicated ->
                         val isAvailable = !isDuplicated
                         _isEmailAvailable.value = isAvailable
-                        _emailStatus.value = if (isAvailable) "사용 가능한 이메일입니다." else "이미 사용 중인 이메일입니다."
+                        _emailStatus.value =
+                            if (isAvailable) "사용 가능한 이메일입니다." else "이미 사용 중인 이메일입니다."
                     },
                     onFailure = {
                         _isEmailAvailable.value = false

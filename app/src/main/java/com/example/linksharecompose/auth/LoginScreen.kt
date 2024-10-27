@@ -62,7 +62,8 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    onNavigateToNicknameSet: (String) -> Unit
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
@@ -226,7 +227,14 @@ fun LoginScreen(
     // 구글 로그인 상태 확인 후 처리
     googleLoginResult?.let { result ->
         if (result.isSuccess) {
-            onLoginSuccess()
+            val user = result.getOrNull()
+            if (user != null) {
+                authViewModel.checkAndNavigateToNicknameScreen(user, onNavigateToNicknameSet= { userId ->
+                    navController.navigate("nicknameSetScreen/$userId")
+                }, onLoginSuccess = {
+                    onLoginSuccess()
+                })
+            }
         } else if (result.isFailure) {
             val error = result.exceptionOrNull()?.message
             Toast.makeText(context, "구글 로그인 실패: $error", Toast.LENGTH_LONG).show()
