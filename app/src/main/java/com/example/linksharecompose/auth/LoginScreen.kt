@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +66,12 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToNicknameSet: (String) -> Unit
 ) {
+    // LoginScreen이 다시 활성화될 때 플래그를 초기화
+    LaunchedEffect(Unit) {
+        authViewModel.hasNavigated = false
+        authViewModel.resetGoogleLoginResult()
+    }
+
     var passwordVisible by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -226,18 +233,24 @@ fun LoginScreen(
 
     // 구글 로그인 상태 확인 후 처리
     googleLoginResult?.let { result ->
-        if (result.isSuccess) {
-            val user = result.getOrNull()
-            if (user != null) {
-                authViewModel.checkAndNavigateToNicknameScreen(user, onNavigateToNicknameSet= { userId ->
-                    navController.navigate("nicknameSetScreen/$userId")
-                }, onLoginSuccess = {
-                    onLoginSuccess()
-                })
+        if (!authViewModel.hasNavigated) {
+            if (result.isSuccess) {
+                val user = result.getOrNull()
+                if (user != null) {
+                    authViewModel.checkAndNavigateToNicknameScreen(user, onNavigateToNicknameSet = { userId ->
+                            navController.navigate("nicknameSetScreen/$userId")
+                            authViewModel.hasNavigated = true
+                        },
+                        onLoginSuccess = {
+                            onLoginSuccess()
+                            authViewModel.hasNavigated = true
+                        })
+                }
+            } else if (result.isFailure) {
+                val error = result.exceptionOrNull()?.message
+                Toast.makeText(context, "구글 로그인 실패: $error", Toast.LENGTH_LONG).show()
+                authViewModel.hasNavigated = true
             }
-        } else if (result.isFailure) {
-            val error = result.exceptionOrNull()?.message
-            Toast.makeText(context, "구글 로그인 실패: $error", Toast.LENGTH_LONG).show()
         }
     }
 
