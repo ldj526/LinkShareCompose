@@ -45,8 +45,10 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _emailLoginResult = MutableLiveData<Result<FirebaseUser?>>()
     val emailLoginResult: LiveData<Result<FirebaseUser?>> get() = _emailLoginResult
 
-    private val _googleLoginResult = MutableLiveData<Result<FirebaseUser?>>()
-    val googleLoginResult: LiveData<Result<FirebaseUser?>> get() = _googleLoginResult
+    private val _googleLoginResult = MutableLiveData<Result<FirebaseUser?>?>()
+    val googleLoginResult: LiveData<Result<FirebaseUser?>?> get() = _googleLoginResult
+
+    var hasNavigated = false
 
     // 닉네임을 Firestore에 추가
     fun addNickname(userId: String, nickname: String) {
@@ -211,5 +213,10 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             }
 
         }
+    }
+
+    // 상태 초기화 메서드
+    fun resetGoogleLoginResult() {
+        _googleLoginResult.value = null
     }
 }
