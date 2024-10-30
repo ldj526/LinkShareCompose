@@ -16,7 +16,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.linksharecompose.MainActivity
+import com.example.linksharecompose.main.MainActivity
 import com.example.linksharecompose.ui.theme.LinkShareComposeTheme
 import com.google.firebase.auth.FirebaseAuth
 
