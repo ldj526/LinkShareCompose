@@ -1,5 +1,6 @@
 package com.example.linksharecompose.main
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,7 +23,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.linksharecompose.auth.AuthActivity
 import com.example.linksharecompose.ui.theme.LinkShareComposeTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,7 +104,13 @@ fun NavigationComponent(navController: NavHostController, paddingValues: Padding
             MyMemoScreen()
         }
         composable(BottomNavScreen.Settings.route) {
-            SettingsScreen()
+            SettingsScreen(navController,
+                onLogout = {
+                    FirebaseAuth.getInstance().signOut()
+                    val context = navController.context
+                    context.startActivity(Intent(context, AuthActivity::class.java))
+                    (context as ComponentActivity).finish()
+                })
         }
     }
 }
