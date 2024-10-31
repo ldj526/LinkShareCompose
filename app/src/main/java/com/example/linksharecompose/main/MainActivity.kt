@@ -36,13 +36,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val auth = FirebaseAuth.getInstance()
+
         setContent {
             LinkShareComposeTheme {
                 val settingsViewModel: SettingsViewModel = viewModel(
                     factory = SettingsViewModelFactory(
-                        AuthRepository(
-                            FirebaseAuth.getInstance()
-                        )
+                        AuthRepository(auth)
                     )
                 )
                 val navController = rememberNavController()
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = { BottomNavigationBar(navController = navController) },
                     content = { paddingValues ->
-                        NavigationComponent(navController, paddingValues, settingsViewModel)
+                        NavigationComponent(navController, paddingValues, settingsViewModel, auth)
                     }
                 )
             }
@@ -100,7 +101,8 @@ fun BottomNavigationBar(navController: NavController) {
 fun NavigationComponent(
     navController: NavHostController,
     paddingValues: PaddingValues,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    auth: FirebaseAuth
 ) {
     NavHost(
         navController = navController,
@@ -121,9 +123,9 @@ fun NavigationComponent(
         }
         composable(BottomNavScreen.Settings.route) {
             SettingsScreen(navController,
-                settingsViewModel,
+                settingsViewModel, auth,
                 onLogout = {
-                    FirebaseAuth.getInstance().signOut()
+                    auth.signOut()
                     val context = navController.context
                     context.startActivity(Intent(context, AuthActivity::class.java))
                     (context as ComponentActivity).finish()

@@ -8,25 +8,6 @@ import kotlinx.coroutines.tasks.await
 
 class AuthRepository(private val auth: FirebaseAuth) {
 
-    // 사용자 이메일 정보 가져오기
-    fun getCurrentUserEmail(): String? {
-        return auth.currentUser?.email
-    }
-
-    // 사용자 인증 제공자 가져오기
-    fun getCurrentUserProvider(): String? {
-        val user = auth.currentUser
-        return if (user != null) {
-            val providers = user.providerData.map { it.providerId }
-            when {
-                providers.contains("google.com") -> "구글"
-                else -> "이메일"
-            }
-        } else {
-            null
-        }
-    }
-
     // 닉네임을 Firestore에 추가
     suspend fun addNicknameToUser(userId: String, nickname: String): Result<Unit> {
         return try {
