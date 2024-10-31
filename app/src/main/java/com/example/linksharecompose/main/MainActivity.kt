@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,6 +25,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.linksharecompose.auth.AuthActivity
+import com.example.linksharecompose.auth.AuthRepository
+import com.example.linksharecompose.settings.SettingsScreen
+import com.example.linksharecompose.settings.SettingsViewModel
+import com.example.linksharecompose.settings.SettingsViewModelFactory
 import com.example.linksharecompose.ui.theme.LinkShareComposeTheme
 import com.google.firebase.auth.FirebaseAuth
 
@@ -33,12 +38,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LinkShareComposeTheme {
+                val settingsViewModel: SettingsViewModel = viewModel(
+                    factory = SettingsViewModelFactory(
+                        AuthRepository(
+                            FirebaseAuth.getInstance()
+                        )
+                    )
+                )
                 val navController = rememberNavController()
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = { BottomNavigationBar(navController = navController) },
                     content = { paddingValues ->
-                        NavigationComponent(navController = navController, paddingValues)
+                        NavigationComponent(navController, paddingValues, settingsViewModel)
                     }
                 )
             }
@@ -85,7 +97,11 @@ fun BottomNavigationBar(navController: NavController) {
 }
 
 @Composable
-fun NavigationComponent(navController: NavHostController, paddingValues: PaddingValues) {
+fun NavigationComponent(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+    settingsViewModel: SettingsViewModel
+) {
     NavHost(
         navController = navController,
         startDestination = BottomNavScreen.Home.route,
@@ -105,6 +121,7 @@ fun NavigationComponent(navController: NavHostController, paddingValues: Padding
         }
         composable(BottomNavScreen.Settings.route) {
             SettingsScreen(navController,
+                settingsViewModel,
                 onLogout = {
                     FirebaseAuth.getInstance().signOut()
                     val context = navController.context

@@ -1,17 +1,20 @@
-package com.example.linksharecompose.main
+package com.example.linksharecompose.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -21,8 +24,15 @@ import com.example.linksharecompose.R
 import com.example.linksharecompose.utils.CustomDialog
 
 @Composable
-fun SettingsScreen(navController: NavHostController, onLogout: () -> Unit) {
+fun SettingsScreen(
+    navController: NavHostController,
+    settingsViewModel: SettingsViewModel,
+    onLogout: () -> Unit
+) {
     var showLogoutDialog by remember { mutableStateOf(false) }
+    val userEmail by settingsViewModel.userEmail.observeAsState()
+    val authProvider by settingsViewModel.authProvider.observeAsState()
+    val isLoading by settingsViewModel.isLoading.observeAsState(initial = false)
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -33,21 +43,25 @@ fun SettingsScreen(navController: NavHostController, onLogout: () -> Unit) {
             style = MaterialTheme.typography.bodyLarge
         )
 
-        Text(
-            text = "로그인 플랫폼",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 32.dp, bottom = 16.dp),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        } else {
+            Text(
+                text = authProvider ?: "정보 없음",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 32.dp, bottom = 16.dp),
+                style = MaterialTheme.typography.bodyMedium
+            )
 
-        Text(
-            text = "이메일",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 32.dp, bottom = 16.dp),
-            style = MaterialTheme.typography.bodyMedium
-        )
+            Text(
+                text = userEmail ?: "정보 없음",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 32.dp, bottom = 16.dp),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         HorizontalDivider(
             color = Color.Gray,
@@ -59,7 +73,7 @@ fun SettingsScreen(navController: NavHostController, onLogout: () -> Unit) {
             text = stringResource(R.string.change_nickname),
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { navController.navigate("changeNickname") }
+                .clickable {  }
                 .padding(16.dp),
             style = MaterialTheme.typography.bodyLarge
         )
@@ -73,7 +87,7 @@ fun SettingsScreen(navController: NavHostController, onLogout: () -> Unit) {
             text = stringResource(R.string.app_info),
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { navController.navigate("appInfo") }
+                .clickable {  }
                 .padding(16.dp),
             style = MaterialTheme.typography.bodyLarge
         )
