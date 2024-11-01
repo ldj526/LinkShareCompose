@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -23,7 +24,10 @@ fun CustomDialog(
     title: String,
     message: String? = null,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    titleColor: Color = MaterialTheme.colorScheme.onSurface,
+    messageColor: Color = MaterialTheme.colorScheme.onSurface,
+    content: @Composable (() -> Unit)? = null
 ) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Surface(
@@ -34,6 +38,7 @@ fun CustomDialog(
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = title,
+                    color = titleColor,
                     modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.bodyLarge
                 )
@@ -41,11 +46,15 @@ fun CustomDialog(
                 if (message != null) {
                     Text(
                         text = message,
+                        color = messageColor,
                         modifier = Modifier.padding(8.dp),
                         style = MaterialTheme.typography.bodySmall
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                 }
+
+                content?.invoke()
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
