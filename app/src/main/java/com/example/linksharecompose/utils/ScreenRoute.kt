@@ -1,4 +1,4 @@
-package com.example.linksharecompose.main
+package com.example.linksharecompose.utils
 
 object ScreenRoute {
     val Home = Screen("home")
@@ -6,6 +6,10 @@ object ScreenRoute {
     val Search = Screen("search")
     val MyMemo = Screen("myMemo")
     val Settings = Screen("settings")
+    val NicknameUpdate = Screen("nicknameUpdate")
+    val Login = Screen("login")
+    val Signup = Screen("signup")
+    val NicknameSet = Screen("nicknameSet")
 
     data class Screen(val route: String)
 }

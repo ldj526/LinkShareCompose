@@ -4,11 +4,15 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
@@ -19,11 +23,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.linksharecompose.R
 import com.example.linksharecompose.utils.CustomDialog
+import com.example.linksharecompose.utils.ScreenRoute
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -58,6 +65,14 @@ fun SettingsScreen(
 
     val deleteAccountStatus by settingsViewModel.deleteAccountStatus.observeAsState()
     val isLoading by settingsViewModel.isLoading.observeAsState(initial = false)
+    val getNicknameStatus by settingsViewModel.getNicknameStatus.observeAsState()
+    val isNicknameLoading by settingsViewModel.isNicknameLoading.observeAsState(initial = false)
+
+    LaunchedEffect(Unit) {
+        currentUser?.uid?.let { userId ->
+            settingsViewModel.getNickname(userId)
+        }
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         if (isLoading) {
@@ -72,7 +87,7 @@ fun SettingsScreen(
             )
 
             Text(
-                text = authProvider ?: "정보 없음",
+                text = authProvider ?: stringResource(R.string.no_info),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 32.dp, bottom = 16.dp),
@@ -80,7 +95,7 @@ fun SettingsScreen(
             )
 
             Text(
-                text = userEmail ?: "정보 없음",
+                text = userEmail ?: stringResource(R.string.no_info),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 32.dp, bottom = 16.dp),
@@ -94,13 +109,50 @@ fun SettingsScreen(
             )
 
             Text(
-                text = stringResource(R.string.change_nickname),
+                text = stringResource(R.string.nickname),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { }
                     .padding(16.dp),
                 style = MaterialTheme.typography.bodyLarge
             )
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    navController.navigate(ScreenRoute.NicknameUpdate.route)
+                }
+                .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+
+                if (isNicknameLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(start = 8.dp).size(24.dp)
+                    )
+                } else {
+                    val nicknameText = when {
+                        getNicknameStatus?.isSuccess == true -> {
+                            getNicknameStatus?.getOrNull() ?: stringResource(R.string.no_info)
+                        }
+                        else -> { stringResource(R.string.fail_to_load_nickname) }
+                    }
+                    Text(
+                        text = nicknameText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.navigate_to_nickname_update),
+                    tint = Color.Gray,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+            }
+
             HorizontalDivider(
                 color = Color.Gray,
                 thickness = 1.dp,

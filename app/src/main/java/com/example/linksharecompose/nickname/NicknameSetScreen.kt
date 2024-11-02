@@ -1,4 +1,4 @@
-package com.example.linksharecompose.auth
+package com.example.linksharecompose.nickname
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -14,8 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -29,28 +33,75 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.linksharecompose.R
 
 @Composable
 fun NicknameSetScreen(
     navController: NavController,
-    authViewModel: AuthViewModel,
+    nicknameViewModel: NicknameViewModel,
     userId: String,
     onNicknameSetSuccess: () -> Unit
 ) {
     var nickname by remember { mutableStateOf("") }
-    val isNicknameCheckLoading by authViewModel.isNicknameCheckLoading.observeAsState(initial = false)
-    val isNicknameAvailable by authViewModel.isNicknameAvailable.observeAsState()
-    val nicknameStatus by authViewModel.nicknameStatus.observeAsState()
-    val isSignupLoading by authViewModel.isSignupLoading.observeAsState(initial = false)
-    val nicknameAddStatus by authViewModel.nicknameAddStatus.observeAsState()
+    val isNicknameCheckLoading by nicknameViewModel.isNicknameCheckLoading.observeAsState(initial = false)
+    val isNicknameAvailable by nicknameViewModel.isNicknameAvailable.observeAsState()
+    val nicknameStatus by nicknameViewModel.nicknameStatus.observeAsState()
+    val setNicknameLoading by nicknameViewModel.setNicknameLoading.observeAsState(initial = false)
+    val nicknameAddStatus by nicknameViewModel.nicknameSetStatus.observeAsState()
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        navController.popBackStack()
+                        nicknameViewModel.resetNicknameCheckStatus()
+                    },
+                    modifier = Modifier
+                        .size(45.dp)
+                        .padding(start = 15.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "뒤로 가기"
+                    )
+                }
+
+                Text(
+                    text = "닉네임 설정",
+                    color = Color.Black,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp, end = 45.dp)
+                        .align(Alignment.CenterVertically),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -63,11 +114,11 @@ fun NicknameSetScreen(
                 onValueChange = {
                     if (it.length <= 10) {
                         nickname = it
-                        authViewModel.onNicknameChanged(it)
+                        nicknameViewModel.onNicknameChanged(it)
                     }
                 },
                 label = { Text("닉네임") },
-                isError = nicknameStatus != null && nicknameStatus != "사용 가능한 닉네임입니다.",
+                isError = nicknameStatus != null && nicknameStatus != stringResource(R.string.enable_nickname),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
@@ -77,10 +128,10 @@ fun NicknameSetScreen(
 
             Button(
                 onClick = {
-                    authViewModel.checkNicknameDuplication(nickname)
+                    nicknameViewModel.checkNicknameDuplication(nickname)
                 },
                 enabled = nickname.isNotEmpty() && !isNicknameCheckLoading &&
-                        nicknameStatus != "닉네임은 한글, 영어, 숫자만 가능합니다.\n2자 이상 10자 이하로 입력해주세요.",
+                        nicknameStatus != stringResource(R.string.nickname_error_msg),
                 modifier = Modifier
                     .wrapContentWidth()
             ) {
@@ -106,7 +157,7 @@ fun NicknameSetScreen(
                 nicknameStatus?.let {
                     Text(
                         text = it,
-                        color = if (it == "사용 가능한 닉네임입니다.") Color.Green else Color.Red,
+                        color = if (it == stringResource(R.string.enable_nickname)) Color.Green else Color.Red,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(start = 16.dp)
                     )
@@ -116,7 +167,7 @@ fun NicknameSetScreen(
 
         Button(
             onClick = {
-                authViewModel.addNickname(userId, nickname)
+                nicknameViewModel.setNickname(userId, nickname)
             },
             enabled = isNicknameAvailable == true,
             modifier = Modifier
@@ -126,7 +177,7 @@ fun NicknameSetScreen(
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(text = "확인")
-                if (isSignupLoading) {
+                if (setNicknameLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier
                             .size(24.dp)

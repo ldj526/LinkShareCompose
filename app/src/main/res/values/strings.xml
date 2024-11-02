@@ -12,11 +12,17 @@
     <string name="logout">로그아웃</string>
     <string name="withdraw">회원탈퇴</string>
     <string name="user_info">사용자 정보</string>
-    <string name="user_nickname">닉네임</string>
+    <string name="nickname">닉네임</string>
     <string name="app_info">앱 정보</string>
-    <string name="change_nickname">닉네임 변경</string>
     <string name="logout_message">로그아웃 하시겠습니까?</string>
     <string name="withdraw_title_message">회원탈퇴 하시겠습니까?</string>
     <string name="withdraw_message">탈퇴 시 모든 정보를 잃습니다.</string>
     <string name="not_logged">사용자가 로그인되어 있지 않습니다.</string>
+    <string name="navigate_to_nickname_update">닉네임 변경 페이지로</string>
+    <string name="no_info">정보 없음</string>
+    <string name="fail_to_load_nickname">닉네임 불러오기 실패</string>
+
+    <!-- Nickname -->
+    <string name="enable_nickname">사용 가능한 닉네임입니다.</string>
+    <string name="nickname_error_msg">"닉네임은 한글, 영어, 숫자만 가능합니다.\n2자 이상 10자 이하로 입력해주세요."</string>
 </resources>

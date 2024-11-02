@@ -53,6 +53,8 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.navigation.NavHostController
 import com.example.linksharecompose.BuildConfig
 import com.example.linksharecompose.R
+import com.example.linksharecompose.nickname.NicknameViewModel
+import com.example.linksharecompose.utils.ScreenRoute
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -63,6 +65,7 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     navController: NavHostController,
     authViewModel: AuthViewModel,
+    nicknameViewModel: NicknameViewModel,
     onLoginSuccess: () -> Unit,
     onNavigateToNicknameSet: (String) -> Unit
 ) {
@@ -237,8 +240,8 @@ fun LoginScreen(
             if (result.isSuccess) {
                 val user = result.getOrNull()
                 if (user != null) {
-                    authViewModel.checkAndNavigateToNicknameScreen(user, onNavigateToNicknameSet = { userId ->
-                            navController.navigate("nicknameSetScreen/$userId")
+                    nicknameViewModel.checkAndNavigateToNicknameScreen(user, onNavigateToNicknameSet = { userId ->
+                            navController.navigate("${ScreenRoute.NicknameSet.route}/$userId")
                             authViewModel.hasNavigated = true
                         },
                         onLoginSuccess = {

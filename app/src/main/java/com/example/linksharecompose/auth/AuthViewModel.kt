@@ -18,15 +18,6 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _isEmailAvailable = MutableLiveData<Boolean?>(null)
     val isEmailAvailable: LiveData<Boolean?> = _isEmailAvailable
 
-    private val _nicknameStatus = MutableLiveData<String?>(null)
-    val nicknameStatus: LiveData<String?> = _nicknameStatus
-
-    private val _nicknameAddStatus = MutableLiveData<Result<Unit>>()
-    val nicknameAddStatus: LiveData<Result<Unit>> get() = _nicknameAddStatus
-
-    private val _isNicknameAvailable = MutableLiveData<Boolean?>(null)
-    val isNicknameAvailable: LiveData<Boolean?> = _isNicknameAvailable
-
     private val _passwordStatus = MutableLiveData<String?>(null)
     val passwordStatus: LiveData<String?> = _passwordStatus
 
@@ -35,9 +26,6 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private val _isSignupLoading = MutableLiveData<Boolean>(false)
     val isSignupLoading: LiveData<Boolean> = _isSignupLoading
-
-    private val _isNicknameCheckLoading = MutableLiveData<Boolean>(false)
-    val isNicknameCheckLoading: LiveData<Boolean> = _isNicknameCheckLoading
 
     private val _isLoginLoading = MutableLiveData<Boolean>(false)
     val isLoginLoading: LiveData<Boolean> = _isLoginLoading
@@ -49,35 +37,6 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     val googleLoginResult: LiveData<Result<FirebaseUser?>?> get() = _googleLoginResult
 
     var hasNavigated = false
-
-    // 닉네임을 Firestore에 추가
-    fun addNickname(userId: String, nickname: String) {
-        _isSignupLoading.value = true
-        viewModelScope.launch {
-            try {
-                val result = repository.addNicknameToUser(userId, nickname)
-                _nicknameAddStatus.postValue(result)
-            } finally {
-                _isSignupLoading.value = false
-            }
-        }
-    }
-
-    // Nickname의 존재 여부 확인 후 view 이동
-    fun checkAndNavigateToNicknameScreen(
-        user: FirebaseUser,
-        onNavigateToNicknameSet: (String) -> Unit,
-        onLoginSuccess: () -> Unit
-    ) {
-        viewModelScope.launch {
-            val hasNickname = repository.userHasNickname(user)
-            if (!hasNickname) {
-                onNavigateToNicknameSet(user.uid)
-            } else {
-                onLoginSuccess()
-            }
-        }
-    }
 
     // Google로 로그인
     fun signInWithGoogle(idToken: String) {
@@ -142,47 +101,6 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         } else {
             _emailStatus.value = null
             _isEmailAvailable.value = null
-        }
-    }
-
-    // 닉네임 중복 확인
-    fun checkNicknameDuplication(nickname: String) {
-        _isNicknameCheckLoading.value = true
-        viewModelScope.launch {
-            try {
-                val result = repository.checkNicknameDuplication(nickname)
-                result.fold(
-                    onSuccess = { isDuplicated ->
-                        val isAvailable = !isDuplicated
-                        _isNicknameAvailable.value = isAvailable
-                        _nicknameStatus.value = if (isAvailable) "사용 가능한 닉네임입니다." else "중복된 닉네임입니다."
-                    },
-                    onFailure = {
-                        _isEmailAvailable.value = false
-                        _emailStatus.value = "닉네임 중복 확인에 실패했습니다."
-                    }
-                )
-            } catch (e: Exception) {
-                _isNicknameAvailable.value = false
-                _nicknameStatus.value = "닉네임 중복 확인에 실패했습니다."
-            } finally {
-                _isNicknameCheckLoading.value = false
-            }
-        }
-    }
-
-    // 닉네임 입력 시 UI 변경
-    fun onNicknameChanged(nickname: String) {
-        val nicknamePattern = "^[A-Za-z0-9가-힣]{2,10}$"
-        if (nickname.isBlank()) {
-            _nicknameStatus.value = null
-            _isNicknameAvailable.value = null
-        } else if (!nickname.matches(nicknamePattern.toRegex())) {
-            _nicknameStatus.value = "닉네임은 한글, 영어, 숫자만 가능합니다.\n2자 이상 10자 이하로 입력해주세요."
-            _isNicknameAvailable.value = false
-        } else {
-            _nicknameStatus.value = null
-            _isNicknameAvailable.value = null
         }
     }
 

@@ -17,6 +17,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.linksharecompose.main.MainActivity
+import com.example.linksharecompose.utils.ScreenRoute
+import com.example.linksharecompose.nickname.NicknameRepository
+import com.example.linksharecompose.nickname.NicknameSetScreen
+import com.example.linksharecompose.nickname.NicknameViewModel
+import com.example.linksharecompose.nickname.NicknameViewModelFactory
 import com.example.linksharecompose.ui.theme.LinkShareComposeTheme
 import com.google.firebase.auth.FirebaseAuth
 
@@ -33,11 +38,16 @@ class AuthActivity : ComponentActivity() {
                         )
                     )
                 )
+                val nicknameViewModel: NicknameViewModel = viewModel(
+                    factory = NicknameViewModelFactory(
+                        NicknameRepository()
+                    )
+                )
                 val navController = rememberNavController()
 
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     content = { paddingValues ->
-                        NavigationComponent(navController, paddingValues, authViewModel)
+                        NavigationComponent(navController, paddingValues, authViewModel, nicknameViewModel)
                     })
             }
         }
@@ -48,30 +58,32 @@ class AuthActivity : ComponentActivity() {
 fun NavigationComponent(
     navController: NavHostController,
     paddingValues: PaddingValues,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    nicknameViewModel: NicknameViewModel
 ) {
     NavHost(
         navController = navController,
-        startDestination = "loginScreen",
+        startDestination = ScreenRoute.Login.route,
         modifier = Modifier.padding(paddingValues = paddingValues)
     ) {
-        composable("signupScreen") { SignupScreen(navController, authViewModel) }
-        composable("loginScreen") {
+        composable(ScreenRoute.Signup.route) { SignupScreen(navController, authViewModel, nicknameViewModel) }
+        composable(ScreenRoute.Login.route) {
             LoginScreen(
                 navController,
                 authViewModel,
+                nicknameViewModel,
                 onLoginSuccess = {
                     val context = navController.context
                     context.startActivity(Intent(context, MainActivity::class.java))
                     (context as ComponentActivity).finish()
                 },
                 onNavigateToNicknameSet = { userId ->
-                    navController.navigate("nicknameSetScreen/$userId")
+                    navController.navigate("${ScreenRoute.NicknameSet.route}/$userId")
                 })
         }
-        composable("nicknameSetScreen/{userId}") { backStackEntry ->
+        composable("${ScreenRoute.NicknameSet.route}/{userId}") { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: ""
-            NicknameSetScreen(navController, authViewModel, userId, onNicknameSetSuccess = {
+            NicknameSetScreen(navController, nicknameViewModel, userId, onNicknameSetSuccess = {
                 val context = navController.context
                 context.startActivity(Intent(context, MainActivity::class.java))
                 (context as ComponentActivity).finish()

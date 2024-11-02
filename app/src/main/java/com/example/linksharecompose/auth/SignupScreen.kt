@@ -43,11 +43,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.linksharecompose.nickname.NicknameViewModel
 
 @Composable
 fun SignupScreen(
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    nicknameViewModel: NicknameViewModel
 ) {
     var nickname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -58,12 +60,12 @@ fun SignupScreen(
 
     val signUpResult by authViewModel.signupResult.observeAsState()
     val isSignupLoading by authViewModel.isSignupLoading.observeAsState(initial = false)
-    val isNicknameCheckLoading by authViewModel.isNicknameCheckLoading.observeAsState(initial = false)
+    val isNicknameCheckLoading by nicknameViewModel.isNicknameCheckLoading.observeAsState(initial = false)
 
     val emailStatus by authViewModel.emailStatus.observeAsState()
     val isEmailAvailable by authViewModel.isEmailAvailable.observeAsState()
-    val nicknameStatus by authViewModel.nicknameStatus.observeAsState()
-    val isNicknameAvailable by authViewModel.isNicknameAvailable.observeAsState()
+    val nicknameStatus by nicknameViewModel.nicknameStatus.observeAsState()
+    val isNicknameAvailable by nicknameViewModel.isNicknameAvailable.observeAsState()
     val passwordStatus by authViewModel.passwordStatus.observeAsState()
     val confirmPasswordStatus by authViewModel.confirmPasswordStatus.observeAsState()
 
@@ -125,7 +127,7 @@ fun SignupScreen(
                 onValueChange = {
                     if (it.length <= 10) {
                         nickname = it
-                        authViewModel.onNicknameChanged(it)
+                        nicknameViewModel.onNicknameChanged(it)
                     }
                 },
                 label = { Text("닉네임") },
@@ -139,7 +141,7 @@ fun SignupScreen(
 
             Button(
                 onClick = {
-                    authViewModel.checkNicknameDuplication(nickname)
+                    nicknameViewModel.checkNicknameDuplication(nickname)
                 },
                 enabled = nickname.isNotEmpty() && !isNicknameCheckLoading &&
                         nicknameStatus != "닉네임은 한글, 영어, 숫자만 가능합니다.\n2자 이상 10자 이하로 입력해주세요.",

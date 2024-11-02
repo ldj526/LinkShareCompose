@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.linksharecompose.R
+import com.example.linksharecompose.utils.ScreenRoute
 
 sealed class BottomNavScreen(val route: String, @StringRes val title: Int, val icon: ImageVector) {
     object Home : BottomNavScreen(ScreenRoute.Home.route, R.string.Home, Icons.Default.Home)

@@ -26,10 +26,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.linksharecompose.auth.AuthActivity
 import com.example.linksharecompose.auth.AuthRepository
+import com.example.linksharecompose.nickname.NicknameRepository
+import com.example.linksharecompose.nickname.NicknameViewModel
+import com.example.linksharecompose.nickname.NicknameViewModelFactory
+import com.example.linksharecompose.nickname.NicknameUpdateScreen
 import com.example.linksharecompose.settings.SettingsScreen
 import com.example.linksharecompose.settings.SettingsViewModel
 import com.example.linksharecompose.settings.SettingsViewModelFactory
 import com.example.linksharecompose.ui.theme.LinkShareComposeTheme
+import com.example.linksharecompose.utils.ScreenRoute
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +48,12 @@ class MainActivity : ComponentActivity() {
             LinkShareComposeTheme {
                 val settingsViewModel: SettingsViewModel = viewModel(
                     factory = SettingsViewModelFactory(
-                        AuthRepository(auth)
+                        AuthRepository(auth), NicknameRepository()
+                    )
+                )
+                val nicknameViewModel: NicknameViewModel = viewModel(
+                    factory = NicknameViewModelFactory(
+                        NicknameRepository()
                     )
                 )
                 val navController = rememberNavController()
@@ -51,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = { BottomNavigationBar(navController = navController) },
                     content = { paddingValues ->
-                        NavigationComponent(navController, paddingValues, settingsViewModel, auth)
+                        NavigationComponent(navController, paddingValues, settingsViewModel, nicknameViewModel, auth)
                     }
                 )
             }
@@ -102,6 +112,7 @@ fun NavigationComponent(
     navController: NavHostController,
     paddingValues: PaddingValues,
     settingsViewModel: SettingsViewModel,
+    nicknameViewModel: NicknameViewModel,
     auth: FirebaseAuth
 ) {
     NavHost(
@@ -130,6 +141,9 @@ fun NavigationComponent(
                     context.startActivity(Intent(context, AuthActivity::class.java))
                     (context as ComponentActivity).finish()
                 })
+        }
+        composable(ScreenRoute.NicknameUpdate.route) {
+            NicknameUpdateScreen(navController, nicknameViewModel)
         }
     }
 }
