@@ -112,7 +112,6 @@ fun SettingsScreen(
                 text = stringResource(R.string.nickname),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { }
                     .padding(16.dp),
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -122,7 +121,7 @@ fun SettingsScreen(
                 .clickable {
                     navController.navigate(ScreenRoute.NicknameUpdate.route)
                 }
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically) {
 
                 if (isNicknameLoading) {
@@ -139,7 +138,7 @@ fun SettingsScreen(
                     Text(
                         text = nicknameText,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 16.dp, bottom = 8.dp, top = 8.dp)
                     )
                 }
 
@@ -163,7 +162,7 @@ fun SettingsScreen(
                 text = stringResource(R.string.app_info),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { }
+                    .clickable { navController.navigate(ScreenRoute.AppInfo.route) }
                     .padding(16.dp),
                 style = MaterialTheme.typography.bodyLarge
             )

@@ -30,6 +30,7 @@ import com.example.linksharecompose.nickname.NicknameRepository
 import com.example.linksharecompose.nickname.NicknameViewModel
 import com.example.linksharecompose.nickname.NicknameViewModelFactory
 import com.example.linksharecompose.nickname.NicknameUpdateScreen
+import com.example.linksharecompose.settings.AppInfoScreen
 import com.example.linksharecompose.settings.SettingsScreen
 import com.example.linksharecompose.settings.SettingsViewModel
 import com.example.linksharecompose.settings.SettingsViewModelFactory
@@ -144,6 +145,9 @@ fun NavigationComponent(
         }
         composable(ScreenRoute.NicknameUpdate.route) {
             NicknameUpdateScreen(navController, nicknameViewModel)
+        }
+        composable(ScreenRoute.AppInfo.route) {
+            AppInfoScreen(navController)
         }
     }
 }

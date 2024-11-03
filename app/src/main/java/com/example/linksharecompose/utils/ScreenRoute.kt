@@ -10,6 +10,7 @@ object ScreenRoute {
     val Login = Screen("login")
     val Signup = Screen("signup")
     val NicknameSet = Screen("nicknameSet")
+    val AppInfo = Screen("appInfo")
 
     data class Screen(val route: String)
 }
