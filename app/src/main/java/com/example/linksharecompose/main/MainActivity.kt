@@ -26,6 +26,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.linksharecompose.auth.AuthActivity
 import com.example.linksharecompose.auth.AuthRepository
+import com.example.linksharecompose.mymemo.MemoCreateScreen
+import com.example.linksharecompose.mymemo.MyMemoScreen
 import com.example.linksharecompose.nickname.NicknameRepository
 import com.example.linksharecompose.nickname.NicknameViewModel
 import com.example.linksharecompose.nickname.NicknameViewModelFactory
@@ -131,7 +133,7 @@ fun NavigationComponent(
             SearchScreen()
         }
         composable(BottomNavScreen.MyMemo.route) {
-            MyMemoScreen()
+            MyMemoScreen(navController)
         }
         composable(BottomNavScreen.Settings.route) {
             SettingsScreen(navController,
@@ -148,6 +150,9 @@ fun NavigationComponent(
         }
         composable(ScreenRoute.AppInfo.route) {
             AppInfoScreen(navController)
+        }
+        composable(ScreenRoute.MemoCreate.route) {
+            MemoCreateScreen(navController)
         }
     }
 }

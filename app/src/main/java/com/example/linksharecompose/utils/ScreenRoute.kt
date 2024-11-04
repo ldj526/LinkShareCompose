@@ -11,6 +11,7 @@ object ScreenRoute {
     val Signup = Screen("signup")
     val NicknameSet = Screen("nicknameSet")
     val AppInfo = Screen("appInfo")
+    val MemoCreate = Screen("memoCreate")
 
     data class Screen(val route: String)
 }
