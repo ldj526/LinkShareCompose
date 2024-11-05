@@ -27,6 +27,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.linksharecompose.auth.AuthActivity
 import com.example.linksharecompose.auth.AuthRepository
 import com.example.linksharecompose.mymemo.MemoCreateScreen
+import com.example.linksharecompose.mymemo.MemoRepository
+import com.example.linksharecompose.mymemo.MemoViewModel
+import com.example.linksharecompose.mymemo.MemoViewModelFactory
 import com.example.linksharecompose.mymemo.MyMemoScreen
 import com.example.linksharecompose.nickname.NicknameRepository
 import com.example.linksharecompose.nickname.NicknameViewModel
@@ -59,12 +62,24 @@ class MainActivity : ComponentActivity() {
                         NicknameRepository()
                     )
                 )
+                val memoViewModel: MemoViewModel = viewModel(
+                    factory = MemoViewModelFactory(
+                        MemoRepository()
+                    )
+                )
                 val navController = rememberNavController()
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = { BottomNavigationBar(navController = navController) },
                     content = { paddingValues ->
-                        NavigationComponent(navController, paddingValues, settingsViewModel, nicknameViewModel, auth)
+                        NavigationComponent(
+                            navController,
+                            paddingValues,
+                            settingsViewModel,
+                            nicknameViewModel,
+                            memoViewModel,
+                            auth
+                        )
                     }
                 )
             }
@@ -116,6 +131,7 @@ fun NavigationComponent(
     paddingValues: PaddingValues,
     settingsViewModel: SettingsViewModel,
     nicknameViewModel: NicknameViewModel,
+    memoViewModel: MemoViewModel,
     auth: FirebaseAuth
 ) {
     NavHost(
@@ -133,7 +149,7 @@ fun NavigationComponent(
             SearchScreen()
         }
         composable(BottomNavScreen.MyMemo.route) {
-            MyMemoScreen(navController)
+            MyMemoScreen(navController, memoViewModel)
         }
         composable(BottomNavScreen.Settings.route) {
             SettingsScreen(navController,
@@ -152,7 +168,7 @@ fun NavigationComponent(
             AppInfoScreen(navController)
         }
         composable(ScreenRoute.MemoCreate.route) {
-            MemoCreateScreen(navController)
+            MemoCreateScreen(navController, memoViewModel)
         }
     }
 }
