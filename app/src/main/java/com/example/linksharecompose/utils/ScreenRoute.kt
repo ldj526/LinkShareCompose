@@ -1,17 +1,18 @@
 package com.example.linksharecompose.utils
 
-object ScreenRoute {
-    val Home = Screen("home")
-    val Community = Screen("community")
-    val Search = Screen("search")
-    val MyMemo = Screen("myMemo")
-    val Settings = Screen("settings")
-    val NicknameUpdate = Screen("nicknameUpdate")
-    val Login = Screen("login")
-    val Signup = Screen("signup")
-    val NicknameSet = Screen("nicknameSet")
-    val AppInfo = Screen("appInfo")
-    val MemoCreate = Screen("memoCreate")
-
-    data class Screen(val route: String)
+sealed class ScreenRoute(val route: String) {
+    object Home : ScreenRoute("home")
+    object Community : ScreenRoute("community")
+    object Search : ScreenRoute("search")
+    object MyMemo : ScreenRoute("myMemo")
+    object Settings : ScreenRoute("settings")
+    object NicknameUpdate : ScreenRoute("nicknameUpdate")
+    object Login : ScreenRoute("login")
+    object Signup : ScreenRoute("signup")
+    object NicknameSet : ScreenRoute("nicknameSet")
+    object AppInfo : ScreenRoute("appInfo")
+    object MemoCreate : ScreenRoute("memoCreate")
+    object MemoDetail : ScreenRoute("memo_detail/{memoId}") {
+        fun createRoute(memoId: String) = "memo_detail/$memoId"
+    }
 }

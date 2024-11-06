@@ -38,7 +38,9 @@ fun MyMemoScreen(navController: NavController, memoViewModel: MemoViewModel) {
         Column(modifier = Modifier.padding(paddingValues)) {
             LazyColumn {
                 items(memos) { memo ->
-                    MemoItem(memo = memo)
+                    MemoItem(memo = memo, onClick = {
+                        navController.navigate(ScreenRoute.MemoDetail.createRoute(memo.memoId))
+                    })
                 }
             }
         }

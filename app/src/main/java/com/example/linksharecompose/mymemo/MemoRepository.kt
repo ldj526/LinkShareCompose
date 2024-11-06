@@ -1,5 +1,6 @@
 package com.example.linksharecompose.mymemo
 
+import android.util.Log
 import com.example.linksharecompose.auth.FirebaseCollection
 import kotlinx.coroutines.tasks.await
 
@@ -33,6 +34,21 @@ class MemoRepository {
                 )
             }
             Result.success(memoList)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // MemoId를 기반으로 메모 가져오기
+    suspend fun fetchMemoById(memoId: String): Result<Memo> {
+        return try {
+            val document = FirebaseCollection.memosCollection.document(memoId).get().await()
+            Log.d("MemoRepository", "document: $document")
+            val memo = document.toObject(Memo::class.java)?.copy(memoId = document.id)
+            Log.d("MemoRepository", "memo: $memo")
+            memo?.let {
+                Result.success(it)
+            } ?: Result.failure(Exception("메모를 찾을 수 없습니다."))
         } catch (e: Exception) {
             Result.failure(e)
         }

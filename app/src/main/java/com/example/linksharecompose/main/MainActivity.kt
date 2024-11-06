@@ -20,21 +20,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.linksharecompose.auth.AuthActivity
 import com.example.linksharecompose.auth.AuthRepository
 import com.example.linksharecompose.mymemo.MemoCreateScreen
+import com.example.linksharecompose.mymemo.MemoDetailScreen
 import com.example.linksharecompose.mymemo.MemoRepository
 import com.example.linksharecompose.mymemo.MemoViewModel
 import com.example.linksharecompose.mymemo.MemoViewModelFactory
 import com.example.linksharecompose.mymemo.MyMemoScreen
 import com.example.linksharecompose.nickname.NicknameRepository
+import com.example.linksharecompose.nickname.NicknameUpdateScreen
 import com.example.linksharecompose.nickname.NicknameViewModel
 import com.example.linksharecompose.nickname.NicknameViewModelFactory
-import com.example.linksharecompose.nickname.NicknameUpdateScreen
 import com.example.linksharecompose.settings.AppInfoScreen
 import com.example.linksharecompose.settings.SettingsScreen
 import com.example.linksharecompose.settings.SettingsViewModel
@@ -68,9 +71,27 @@ class MainActivity : ComponentActivity() {
                     )
                 )
                 val navController = rememberNavController()
+
+                // 현재 경로를 관찰하여 결정
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                // 특정 화면에서만 BottomNavigationBar를 나타냄
+                val shouldShowBottomBar = when (currentRoute) {
+                    ScreenRoute.Search.route,
+                    ScreenRoute.Settings.route,
+                    ScreenRoute.MyMemo.route,
+                    ScreenRoute.Home.route,
+                    ScreenRoute.Community.route -> true
+                    else -> false
+                }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    bottomBar = { BottomNavigationBar(navController = navController) },
+                    bottomBar = {
+                        if (shouldShowBottomBar) {
+                            BottomNavigationBar(navController = navController)
+                    } },
                     content = { paddingValues ->
                         NavigationComponent(
                             navController,
@@ -169,6 +190,14 @@ fun NavigationComponent(
         }
         composable(ScreenRoute.MemoCreate.route) {
             MemoCreateScreen(navController, memoViewModel)
+        }
+        composable(
+            ScreenRoute.MemoDetail.route, arguments = listOf(navArgument("memoId") {
+                type = NavType.StringType
+            })
+        ) { backStackEntry ->
+            val memoId = backStackEntry.arguments?.getString("memoId") ?: return@composable
+            MemoDetailScreen(navController, memoViewModel, memoId)
         }
     }
 }

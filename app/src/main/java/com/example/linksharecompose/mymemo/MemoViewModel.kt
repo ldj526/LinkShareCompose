@@ -14,6 +14,9 @@ class MemoViewModel(private val repository: MemoRepository) : ViewModel() {
     private val _memos = MutableLiveData<List<Memo>>()
     val memos: LiveData<List<Memo>> get() = _memos
 
+    private val _memo = MutableLiveData<Memo?>()
+    val memo: LiveData<Memo?> get() = _memo
+
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
@@ -27,6 +30,25 @@ class MemoViewModel(private val repository: MemoRepository) : ViewModel() {
             try {
                 val result = repository.addMemo(memo)
                 _addMemoResult.value = result
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    // MemoId를 기반으로 메모 가져오기
+    fun fetchMemoById(memoId: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val result = repository.fetchMemoById(memoId)
+                if (result.isSuccess) {
+                    _memo.value = result.getOrNull()
+                } else {
+                    _memo.value = null
+                }
+            } catch (e: Exception) {
+                _memo.value = null
             } finally {
                 _isLoading.value = false
             }
