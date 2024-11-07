@@ -6,6 +6,16 @@ import kotlinx.coroutines.tasks.await
 
 class MemoRepository {
 
+    // 메모 삭제
+    suspend fun deleteMemo(memoId: String): Result<Unit> {
+        return try {
+            FirebaseCollection.memosCollection.document(memoId).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     // 메모 추가
     suspend fun addMemo(memo: Memo): Result<Unit> {
         return try {

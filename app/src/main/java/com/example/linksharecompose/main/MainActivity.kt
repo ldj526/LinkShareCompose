@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,6 +73,8 @@ class MainActivity : ComponentActivity() {
                 )
                 val navController = rememberNavController()
 
+                val isSelectionMode by memoViewModel.isSelectionMode.observeAsState(false)
+
                 // 현재 경로를 관찰하여 결정
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
@@ -89,7 +92,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        if (shouldShowBottomBar) {
+                        if (shouldShowBottomBar && !isSelectionMode) {
                             BottomNavigationBar(navController = navController)
                     } },
                     content = { paddingValues ->

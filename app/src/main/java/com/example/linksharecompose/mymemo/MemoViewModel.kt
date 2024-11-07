@@ -8,6 +8,12 @@ import kotlinx.coroutines.launch
 
 class MemoViewModel(private val repository: MemoRepository) : ViewModel() {
 
+    private val _selectedMemos = MutableLiveData<Set<String>>(emptySet())
+    val selectedMemos: LiveData<Set<String>> get() = _selectedMemos
+
+    private val _isSelectionMode = MutableLiveData<Boolean>(false)
+    val isSelectionMode: LiveData<Boolean> get() = _isSelectionMode
+
     private val _addMemoResult = MutableLiveData<Result<Unit>?>()
     val addMemoResult: LiveData<Result<Unit>?> get() = _addMemoResult
 
@@ -22,6 +28,48 @@ class MemoViewModel(private val repository: MemoRepository) : ViewModel() {
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
+
+    // 선택 관리
+    fun selectMemo(memoId: String) {
+        val currentSelections = _selectedMemos.value.orEmpty().toMutableSet()
+        if (currentSelections.contains(memoId)) {
+            currentSelections.remove(memoId)
+        } else {
+            currentSelections.add(memoId)
+        }
+        _selectedMemos.value = currentSelections
+    }
+
+    // 전체 선택/해제
+    fun toggleSelectAllMemos() {
+        val allMemoIds = _memos.value?.map { it.memoId }.orEmpty()
+        if (_selectedMemos.value == allMemoIds.toSet()) {
+            _selectedMemos.value = emptySet()
+        } else {
+            _selectedMemos.value = allMemoIds.toSet()
+        }
+    }
+
+    // 선택된 메모 삭제
+    fun deleteSelectedMemos() {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val idsToDelete = _selectedMemos.value.orEmpty()
+                for (memoId in idsToDelete) {
+                    repository.deleteMemo(memoId)
+                }
+                _memos.value = _memos.value?.filterNot { idsToDelete.contains(it.memoId) }
+                _selectedMemos.value = emptySet()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun setSelectionMode(enabled: Boolean) {
+        _isSelectionMode.value = enabled
+    }
 
     // 메모 추가
     fun addMemo(memo: Memo) {
