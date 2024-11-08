@@ -25,4 +25,7 @@
     <!-- Nickname -->
     <string name="enable_nickname">사용 가능한 닉네임입니다.</string>
     <string name="nickname_error_msg">"닉네임은 한글, 영어, 숫자만 가능합니다.\n2자 이상 10자 이하로 입력해주세요."</string>
+
+    <!-- Delete -->
+    <string name="delete_memo">삭제하시겠습니까?</string>
 </resources>

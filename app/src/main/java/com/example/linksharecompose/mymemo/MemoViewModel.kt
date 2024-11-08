@@ -8,6 +8,9 @@ import kotlinx.coroutines.launch
 
 class MemoViewModel(private val repository: MemoRepository) : ViewModel() {
 
+    private val _updateMemoResult = MutableLiveData<Result<Unit>?>()
+    val updateMemoResult: LiveData<Result<Unit>?> get() = _updateMemoResult
+
     private val _selectedMemos = MutableLiveData<Set<String>>(emptySet())
     val selectedMemos: LiveData<Set<String>> get() = _selectedMemos
 
@@ -28,6 +31,34 @@ class MemoViewModel(private val repository: MemoRepository) : ViewModel() {
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
+
+    // 메모 업데이트
+    fun updateMemo(memo: Memo) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val result = repository.updateMemo(memo)
+                _updateMemoResult.value = result
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    // 단일 메모 삭제
+    fun deleteMemoById(memoId: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val result = repository.deleteMemo(memoId)
+                if (result.isSuccess) {
+                    _memos.value = _memos.value?.filterNot { it.memoId == memoId }
+                }
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 
     // 선택 관리
     fun selectMemo(memoId: String) {
@@ -121,6 +152,11 @@ class MemoViewModel(private val repository: MemoRepository) : ViewModel() {
                 _isLoading.value = false
             }
         }
+    }
+
+    // 메모 수정 성공 상태 초기화
+    fun resetUpdateMemoResult() {
+        _updateMemoResult.value = null
     }
 
     // 메모 저장 성공 상태 초기화

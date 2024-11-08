@@ -31,6 +31,7 @@ import com.example.linksharecompose.auth.AuthActivity
 import com.example.linksharecompose.auth.AuthRepository
 import com.example.linksharecompose.mymemo.MemoCreateScreen
 import com.example.linksharecompose.mymemo.MemoDetailScreen
+import com.example.linksharecompose.mymemo.MemoEditScreen
 import com.example.linksharecompose.mymemo.MemoRepository
 import com.example.linksharecompose.mymemo.MemoViewModel
 import com.example.linksharecompose.mymemo.MemoViewModelFactory
@@ -201,6 +202,9 @@ fun NavigationComponent(
         ) { backStackEntry ->
             val memoId = backStackEntry.arguments?.getString("memoId") ?: return@composable
             MemoDetailScreen(navController, memoViewModel, memoId)
+        }
+        composable(ScreenRoute.MemoEdit.route) {
+            MemoEditScreen(navController, memoViewModel)
         }
     }
 }

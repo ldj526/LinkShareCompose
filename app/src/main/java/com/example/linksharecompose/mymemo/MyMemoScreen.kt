@@ -42,6 +42,7 @@ fun MyMemoScreen(navController: NavController, memoViewModel: MemoViewModel) {
     val memos by memoViewModel.memos.observeAsState(emptyList())
     val selectedMemos by memoViewModel.selectedMemos.observeAsState(emptySet())
     val isSelectionMode by memoViewModel.isSelectionMode.observeAsState(false)
+    val isLoading by memoViewModel.isLoading.observeAsState(initial = false)
 
     BackHandler(isSelectionMode) {
         memoViewModel.setSelectionMode(false)
@@ -121,8 +122,10 @@ fun MyMemoScreen(navController: NavController, memoViewModel: MemoViewModel) {
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            if (memoViewModel.isLoading.value == true) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()

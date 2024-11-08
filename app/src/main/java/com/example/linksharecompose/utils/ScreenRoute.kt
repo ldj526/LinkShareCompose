@@ -15,4 +15,5 @@ sealed class ScreenRoute(val route: String) {
     object MemoDetail : ScreenRoute("memo_detail/{memoId}") {
         fun createRoute(memoId: String) = "memo_detail/$memoId"
     }
+    object MemoEdit: ScreenRoute("memoEdit")
 }
